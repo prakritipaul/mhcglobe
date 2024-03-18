@@ -2,7 +2,7 @@ import os
 
 ## "/content/mhcglobe/src"
 # "/Users/prakritipaul/Git/mhcglobe"
-mhcglobe_dir = "/content/mhcglobe/src"
+mhcglobe_dir = "/content/mhcglobe"
 
 class DataPaths():
     def __init__(self):
