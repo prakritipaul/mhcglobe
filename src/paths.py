@@ -1,7 +1,7 @@
 import os
 
 ## edit this
-mhcglobe_dir = '/home/dghersi/Programs/mhcglobe'
+mhcglobe_dir = '/Users/prakritipaul/Git/mhcglobe'
 
 class DataPaths():
     def __init__(self):
