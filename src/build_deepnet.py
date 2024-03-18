@@ -24,12 +24,14 @@ class BuildModel():
         if hparams['dense_layers']>=layer_number and hparams[f'skip_{layer_number}']:
             dense = Concatenate(axis=1, name=f'skip{layer_number}')([tnsr, dense])
         return dense
-
+    
+    # What are these encoders?
     def mhcglobe_encoder(self):
         aa_rep_len = 20
         mhc_len    = 34
         pep_len    = 15
-        
+
+        # Really important!
         input_peptide_tnsr = Input(
             shape=(pep_len, aa_rep_len),
             name='peptide_input', dtype='float32')
@@ -37,6 +39,7 @@ class BuildModel():
             shape=(mhc_len, aa_rep_len),
             name='mhc_input', dtype='float32')
 
+        # Why is he flattening these things?
         self.peptide_tnsr = Flatten()(input_peptide_tnsr)
         self.mhc_tnsr = Flatten()(input_mhc_tnsr)
 
