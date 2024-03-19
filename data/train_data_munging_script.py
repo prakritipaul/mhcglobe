@@ -1,5 +1,6 @@
 """
 	Understanding contents of training data file.
+	Note: This is not cleaned up!!!
 
 	# datapoints = 1229838
 
