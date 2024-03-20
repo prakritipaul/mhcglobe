@@ -327,6 +327,8 @@ def get_XY(df, encode_type='ONE_HOT', get_Y=True):
                 of all peptides (len = #alleles= #peptides)
         - test_X_peptide_1 = test_X_peptides[0]
             len = 15
+
+        Y = array of ba.from_ic50 of measurement values
     """
     SeqObj = SeqRepresentation(encode_type)
 

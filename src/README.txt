@@ -5,7 +5,7 @@
 def to_ic50
 def from_ic50
 
-(2) build_deepnet.py
+(2) build_deepnet.py (UNCLEAR)
 - class BuildModel():
 	"""Create model architecture for MHCGlobe."""
 	

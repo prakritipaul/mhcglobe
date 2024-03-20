@@ -162,9 +162,10 @@ def load_ensemble(model_dir : str, model_group : str):
 class BalanceSplitData():
     """
     Input:
-        df from "mhcglobe_full_train_data.csv"
-        cols = "allele", "dataset", "measurement_inequality", "measurement_value",
-               "peptide", "Gene", "is_ABC", "is_human"
+        df from "mhcglobe_full_train_data.csv"/can also work if you only
+            have the *cols below
+        cols = *"allele", "dataset", *"measurement_inequality", *"measurement_value",
+               *"peptide", "Gene", "is_ABC", "is_human"
 
     Routine: 
         Sample input df indices at random to be a second split.
@@ -186,15 +187,18 @@ class BalanceSplitData():
     def get_train_val(self, df):
         """
         Input:
-            df from "mhcglobe_full_train_data.csv"
-            cols = "allele", "dataset", "measurement_inequality", "measurement_value",
-                   "peptide", "Gene", "is_ABC", "is_human"
-        
+            df from "mhcglobe_full_train_data.csv"/can also work if you only
+            have the *cols below
+        cols = *"allele", "dataset", *"measurement_inequality", *"measurement_value",
+               *"peptide", "Gene", "is_ABC", "is_human"
+
         Routine:
             Generate a split per allele.
 
         Output:
-            df 
+            2 dfs- train, early_stopping/validation
+            both have all cols above + index + test (false/true)
+            test = true if allele/peptide are in early_stopping/validation.
         """
         df_with_split_col = []
         for allele in set(df['allele']):
