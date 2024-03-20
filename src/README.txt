@@ -1,5 +1,6 @@
-(1) binding_affinity.py
+# Explanation of key classes/functions in each of the python scripts pertaining to MHCGlobe.
 
+(1) binding_affinity.py
 # convert binding affinity values
 def to_ic50
 def from_ic50
@@ -155,6 +156,16 @@ def from_ic50
         - test_X_peptide_1 = test_X_peptides[0]
             len = 15
 
-	
+(7) paths.py
+Literally just the paths to pertinent files.
+
+(8) TO DO train_functions.py
+
+(9) TO DO inequality_loss.py
+
+(10) (SKIPPED) my_functions.py
+
+(*11) mhcglobe.py
+
 				
 

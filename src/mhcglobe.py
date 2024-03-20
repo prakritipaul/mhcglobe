@@ -105,7 +105,8 @@ class ensemble():
         assert set([tup[-1] for tup in self.hparam_ids]) == {self.protein_encoding}
         
         if train_type in ['init', 'full']:
-            self.train_type = train_type        
+            self.train_type = train_type
+            # These models are of type <keras.src.engine.functional.Functional>
             self.ensemble_base_models = LoadMHCGlobe().models(self.train_type)
             self.ensemble_model_paths = LoadMHCGlobe().paths(self.train_type)
         else:
@@ -123,6 +124,7 @@ class ensemble():
         
         df_train
             Pandas data frame with training data
+            Created from "mhcglobe_full_training_data.csv"
             
         Outputs
         _________

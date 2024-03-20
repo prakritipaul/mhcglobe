@@ -161,17 +161,40 @@ def load_ensemble(model_dir : str, model_group : str):
 
 class BalanceSplitData():
     """
-    Sample input df indices at random to be a second split. Splits are balanced by allele.
+    Input:
+        df from "mhcglobe_full_train_data.csv"
+        cols = "allele", "dataset", "measurement_inequality", "measurement_value",
+               "peptide", "Gene", "is_ABC", "is_human"
+
+    Routine: 
+        Sample input df indices at random to be a second split.
+        * Splits are balanced by allele.
+
+    Output: 
+        df with cols = "index", "test" (true/false) + all other cols above.
+
     """
     def assign_test_indicies(self, df):
+        # 245967
         test_size = int(df.shape[0] * 1/5)
+        # RangeIndex(start=0, stop=1229838, step=1), 245967
         test_indices = np.random.choice(df.index, size=test_size, replace=False)
+        # Add a new column "test" that has the test_indices above.
         df.insert(0, 'test', [i in test_indices for i in df.index])
         return df
 
     def get_train_val(self, df):
         """
-        Generate a split per allele.
+        Input:
+            df from "mhcglobe_full_train_data.csv"
+            cols = "allele", "dataset", "measurement_inequality", "measurement_value",
+                   "peptide", "Gene", "is_ABC", "is_human"
+        
+        Routine:
+            Generate a split per allele.
+
+        Output:
+            df 
         """
         df_with_split_col = []
         for allele in set(df['allele']):

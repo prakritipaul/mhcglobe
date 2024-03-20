@@ -11,14 +11,20 @@ from sequence_functions import PseudoSeq
 class pMHC_Data():
     def __init__(self, only_EL, drop_duplicate_records=False):
         pMHC_data_path = DataPaths().mhcglobe_full_training_data
+        # Dataframe of data in "mhcglobe_full_train_data.csv"
         self.data = pandas.read_csv(pMHC_data_path)
-            
-        # Subset Data–Binding Affinity and Elution or ONLY Elution
+        """
+        Subset Data–Binding Affinity and Elution or ONLY Elution
+        
+        ">" is not considered here!
+        """
+        # 1,032,870
         if not only_EL:
             self.positives = self.data[
                 (self.data['measurement_value']<=500) &
                 (self.data['measurement_inequality'].isin(['<', '=']))]
-        else: # EL ONLY
+        # EL ONLY 978,877
+        else: 
             self.positives = self.data[
                 (self.data['measurement_type']!='BA') &
                 (self.data['measurement_value']<=500) &
@@ -33,7 +39,9 @@ class pMHC_Data():
         # Used only for choosing test-MHC alleles.
         self.positives_noduplicates = self.positives.drop_duplicates(keep='first', subset=['allele', 'peptide'])
         
+        # dataframe with 2 columns "allele" and "sequence"
         self.pseudoseq = PseudoSeq().pseudoseq
+        # dict version as above
         self.allele2seq = PseudoSeq().allele2seq
         
     

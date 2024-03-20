@@ -23,99 +23,142 @@
 	# 13 
 	not_ABC_set = {'SLA-1', 'BoLA-', 'H-2-D', 'Eqca-', 'Mamu-', 'HLA-G', 'H-2-K', 'Patr-', 'SLA-2', 'HLA-E', 'H-2-L', 'DLA-8', 'Gogo-'}
 	# Note: all non_human_genes also have is_ABC == "False"
+	
+	# 180873
+	BA measurements = BA
+	# 1048965
+	not BA measurements = MA/SA (from EL experiments) 
 
+	# 3 measurement inequalities =, >, <
+	# = only pertains to BA; others only pertain to SA/MA
 """
 
 import csv
 from pprint import pprint
 
-def munge_full_train_data():
-	i = 0
-	human_genes, non_human_genes = set(), set()
-	is_human_count, not_human_count = 0, 0
-	num_HLA_G, num_HLA_A, num_HLA_E, num_HLA_C, num_HLA_B = 0, 0, 0, 0, 0
-	num_SLA_1, num_BoLA, num_H_2_D, num_Eqca, num_Mamu, num_H_2_K, num_Patr, num_SLA_2, num_H_2_L, num_DLA_8, num_Gogo = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+i = 0
+human_genes, non_human_genes = set(), set()
+is_human_count, not_human_count = 0, 0
+num_HLA_G, num_HLA_A, num_HLA_E, num_HLA_C, num_HLA_B = 0, 0, 0, 0, 0
+num_SLA_1, num_BoLA, num_H_2_D, num_Eqca, num_Mamu, num_H_2_K, num_Patr, num_SLA_2, num_H_2_L, num_DLA_8, num_Gogo = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
-	datasets = set()
-	is_ABC_set, not_ABC_set = set(), set()
+BA_measurements, not_BA_measurements = list(), list()
 
-	non_human_and_not_ABC_count = 0
+datasets = set()
+is_ABC_set, not_ABC_set = set(), set()
 
-	with open('mhcglobe_full_train_data.csv', newline='') as csvfile:
-	    reader = csv.DictReader(csvfile)
-	    for row in reader:
-	    	i += 1
-	    	# print(row, "\n")
-	    	gene, dataset, is_ABC, is_human = row["Gene"], row["dataset"], row["is_ABC"], row["is_human"]
-	    	# print(gene, dataset, is_human, is_ABC)
+non_human_and_not_ABC_count = 0
 
-	    	# datasets
-	    	datasets.add(dataset)
+with open('mhcglobe_full_train_data.csv', newline='') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+    	i += 1
+    	# print(row, "\n")
+    	gene, dataset, measurement_inequality, measurement_type, peptide, is_ABC, is_human = row["Gene"], row["dataset"], row["measurement_inequality"], row["measurement_type"], row["peptide"], row["is_ABC"], row["is_human"]
+    	# print(gene, dataset, is_human, is_ABC)
 
-	    	if is_human == "True":
-	    		is_human_count += 1
-	    		human_genes.add(gene)
-	    		if gene == "HLA-G":
-	    			num_HLA_G += 1
-	    		elif gene == "HLA-A":
-	    			num_HLA_A += 1
-	    		elif gene == "HLA-E":
-	    			num_HLA_E += 1
-	    		elif gene == "HLA-C":
-	    			num_HLA_C += 1
-	    		elif gene == "HLA-B":
-	    			num_HLA_B += 1
+    	# datasets
+    	datasets.add(dataset)
 
-	    	else:
-	    		not_human_count += 1
-	    		non_human_genes.add(gene)
-	    		if gene == "SLA-1":
-	    			num_SLA_1 += 1
-	    		elif gene == "BoLA-":
-	    			num_BoLA += 1
-	    		elif gene == "H-2-D":
-	    			num_H_2_D += 1
-	    		elif gene == "Eqca-":
-	    			num_Eqca += 1
-	    		elif gene == "Mamu-":
-	    			num_Mamu += 1
-	    		elif gene == "H-2-K":
-	    			num_H_2_K += 1
-	    		elif gene == "Patr-":
-	    			num_Patr += 1
-	    		elif gene == "SLA-2":
-	    			num_SLA_2 += 1
-	    		elif gene == "H-2-L":
-	    			num_H_2_L += 1
-	    		elif gene == "DLA-8":
-	    			num_DLA_8 += 1
-	    		elif gene == "Gogo-":
-	    			num_Gogo += 1
-	    		# Are all non-humans also not_ABC? - Yes!
-	    		if is_ABC == "False":
-	    			non_human_and_not_ABC_count += 1
+    	if is_human == "True":
+    		is_human_count += 1
+    		human_genes.add(gene)
+    		if gene == "HLA-G":
+    			num_HLA_G += 1
+    		elif gene == "HLA-A":
+    			num_HLA_A += 1
+    		elif gene == "HLA-E":
+    			num_HLA_E += 1
+    		elif gene == "HLA-C":
+    			num_HLA_C += 1
+    		elif gene == "HLA-B":
+    			num_HLA_B += 1
 
-	    	# ABC conditions
-	    	if is_ABC == "True":
-	    		is_ABC_set.add(gene)
-	    	else:
-	    		not_ABC_set.add(gene)
+    	else:
+    		not_human_count += 1
+    		non_human_genes.add(gene)
+    		if gene == "SLA-1":
+    			num_SLA_1 += 1
+    		elif gene == "BoLA-":
+    			num_BoLA += 1
+    		elif gene == "H-2-D":
+    			num_H_2_D += 1
+    		elif gene == "Eqca-":
+    			num_Eqca += 1
+    		elif gene == "Mamu-":
+    			num_Mamu += 1
+    		elif gene == "H-2-K":
+    			num_H_2_K += 1
+    		elif gene == "Patr-":
+    			num_Patr += 1
+    		elif gene == "SLA-2":
+    			num_SLA_2 += 1
+    		elif gene == "H-2-L":
+    			num_H_2_L += 1
+    		elif gene == "DLA-8":
+    			num_DLA_8 += 1
+    		elif gene == "Gogo-":
+    			num_Gogo += 1
+    		# Are all non-humans also not_ABC? - Yes!
+    		if is_ABC == "False":
+    			non_human_and_not_ABC_count += 1
 
-	print(f"human_genes = {human_genes}")
-	print("\n")
-	print(f"non_human_genes = {non_human_genes}")
-	print("\n")
-	print(f"datasets = {datasets}")
-	print("\n")
-	print(f"is_ABC_set = {is_ABC_set}")
-	print("\n")
-	print(f"not_ABC_set = {not_ABC_set}")
+    	# BA, EL (SA, MA)
+    	if measurement_type == "BA":
+    		BA_measurements.append((gene, peptide, measurement_type))
+    	else:
+    		not_BA_measurements.append((gene, peptide, measurement_type))
 
-	print(f"num_HLA_G = {num_HLA_G}, num_HLA_A = {num_HLA_A}, num_HLA_E = {num_HLA_E}, num_HLA_C = {num_HLA_C}, num_HLA_B = {num_HLA_B}")
-	print(f"num_SLA_1 = {num_SLA_1}, num_BoLA = {num_BoLA}, num_H_2_D = {num_H_2_D}, num_Eqca = {num_Eqca}, num_Mamu = {num_Mamu}, num_H_2_K = {num_H_2_K}, num_Patr = {num_Patr}, num_SLA_2 = {num_SLA_2}, num_H_2_L = {num_H_2_L}, num_DLA_8 = {num_DLA_8}, num_Gogo = {num_Gogo}")
+    	# Inequalities - do "=" only pertain to BA's?
+    	# if measurement_inequality == ">" and measurement_type == "SA":
+    	# 	print("nope!")
+    	# 	break
 
-	print("\n", non_human_and_not_ABC_count == not_human_count)
-    	
-if __name__ == "__main__":
-	munge_full_train_data()
- 
+    	# ABC conditions
+    	if is_ABC == "True":
+    		is_ABC_set.add(gene)
+    	else:
+    		not_ABC_set.add(gene)
+
+# print(f"human_genes = {human_genes}")
+# print("\n")
+# print(f"non_human_genes = {non_human_genes}")
+# print("\n")
+# print(f"datasets = {datasets}")
+# print("\n")
+# print(f"is_ABC_set = {is_ABC_set}")
+# print("\n")
+# print(f"not_ABC_set = {not_ABC_set}")
+
+# print(f"num_HLA_G = {num_HLA_G}, num_HLA_A = {num_HLA_A}, num_HLA_E = {num_HLA_E}, num_HLA_C = {num_HLA_C}, num_HLA_B = {num_HLA_B}")
+# print(f"num_SLA_1 = {num_SLA_1}, num_BoLA = {num_BoLA}, num_H_2_D = {num_H_2_D}, num_Eqca = {num_Eqca}, num_Mamu = {num_Mamu}, num_H_2_K = {num_H_2_K}, num_Patr = {num_Patr}, num_SLA_2 = {num_SLA_2}, num_H_2_L = {num_H_2_L}, num_DLA_8 = {num_DLA_8}, num_Gogo = {num_Gogo}")
+
+# print("\n", non_human_and_not_ABC_count == not_human_count)
+
+
+###### Now I want to know what alleles have BA and not_BA measurements ######
+BA_measurement_alleles = set([allele for (allele, peptide, measurement_type) in BA_measurements])
+not_BA_measurement_alleles = set([allele for (allele, peptide, measurement_type) in not_BA_measurements])
+
+# # {'BoLA-', 'Gogo-'} not in not_BA_measurement_alleles
+# print(BA_measurement_alleles)
+# print(not_BA_measurement_alleles)
+
+# not_BA_measurement_types = set([measurement_type for (allele, peptide, measurement_type) in not_BA_measurements])
+# print(not_BA_measurement_types)
+
+####### See if numbers line up with supplement!
+
+def get_HLA_count(measurements):
+	count = 0
+	HLA_tups = list()
+	for tup in measurements:
+		if "HLA" in tup[0]:
+			count += 1
+			HLA_tups.append(tup)
+	return HLA_tups, count
+
+HLA_count_outputs = get_HLA_count(BA_measurements)
+HLA_tups, HLA_count = HLA_count_outputs[0], HLA_count_outputs[1]
+
+
