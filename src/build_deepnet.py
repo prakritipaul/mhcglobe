@@ -26,6 +26,7 @@ class BuildModel():
         return dense
     
     # What are these encoders?
+    # Refer to the plot_model in google doc.
     def mhcglobe_encoder(self):
         aa_rep_len = 20
         mhc_len    = 34

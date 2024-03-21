@@ -160,22 +160,23 @@ def load_ensemble(model_dir : str, model_group : str):
     return ensemble_models
 
 class BalanceSplitData():
-    """
-    Input:
-        df from "mhcglobe_full_train_data.csv"/can also work if you only
-            have the *cols below
-        cols = *"allele", "dataset", *"measurement_inequality", *"measurement_value",
-               *"peptide", "Gene", "is_ABC", "is_human"
-
-    Routine: 
-        Sample input df indices at random to be a second split.
-        * Splits are balanced by allele.
-
-    Output: 
-        df with cols = "index", "test" (true/false) + all other cols above.
-
-    """
     def assign_test_indicies(self, df):
+        """
+        Input:
+            df from "mhcglobe_full_train_data.csv"/can also work if you only
+                have the *cols below
+            cols = *"allele", "dataset", *"measurement_inequality", *"measurement_value",
+                   *"peptide", "Gene", "is_ABC", "is_human"
+
+        Routine: 
+            Sample input df indices at random to be a second split.
+            * Splits are balanced by allele.
+
+        Output: 
+            df with cols = "index", "test" (true/false) + all other cols above.
+        
+        Use case: called by "get_train_val"
+        """
         # 245967
         test_size = int(df.shape[0] * 1/5)
         # RangeIndex(start=0, stop=1229838, step=1), 245967
@@ -201,10 +202,14 @@ class BalanceSplitData():
             test = true if allele/peptide are in early_stopping/validation.
         """
         df_with_split_col = []
+        # This is the part where the allele-balance comes in.
+        # random indices are assigned within a given allele.
+        # this make "sub_dfs" which get appended to a new df (df_with_split_col).
         for allele in set(df['allele']):
             sub_df = self.assign_test_indicies(df[df['allele']==allele])
             df_with_split_col.append(sub_df)
-            
+        
+        # turn into 1 df.
         df_with_split_col = pd.concat(
             df_with_split_col,
             axis=0,

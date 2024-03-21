@@ -79,6 +79,7 @@ class pMHC_Data():
         return data_count_Dict
   
     def get_data_alleles(self, data_count_Dict):
+        # This is probably useful for MHCPerf
         data_alleles = []
         data_alleles_50 = []
         #for allele in self.data_count_Dict:
