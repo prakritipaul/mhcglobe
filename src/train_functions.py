@@ -180,6 +180,7 @@ class BalanceSplitData():
         # 245967
         test_size = int(df.shape[0] * 1/5)
         # RangeIndex(start=0, stop=1229838, step=1), 245967
+        # This is not deterministic!
         test_indices = np.random.choice(df.index, size=test_size, replace=False)
         # Add a new column "test" that has the test_indices above.
         df.insert(0, 'test', [i in test_indices for i in df.index])
