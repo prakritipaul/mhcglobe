@@ -2,13 +2,13 @@ import matplotlib.pyplot as plt
 from scipy.stats import linregress
 from sklearn.metrics import mean_squared_error
 
-def save_model(object, saved_object_filename):
+def save_model(object_to_save, saved_object_filename):
   """
     Dumps object into a given directory.
     Note: This only works after the google drive is mounted in colab.
 
     Args:
-      object: of any kind
+      object_to_save: of any kind
       saved_object_filename: self-explanatory 
 
     Returns:
@@ -25,7 +25,7 @@ def save_model(object, saved_object_filename):
       reloaded_pMHC_data = jb.load(saved_objects_path)
 
   """
-  dumps object into a given directory
+  jb.dump(object_to_save, saved_object_filename)
 
 
 def make_scatter_plot(df, x_col, y_col):
