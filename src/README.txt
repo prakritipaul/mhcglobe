@@ -132,9 +132,13 @@ def from_ic50
 		                             0., 0., 0., 0.]])
 - (KEY function) seq_to_15mer
     	Makes input peptide representation in the style of MHCFlurry.
-	Example 1: ARDV -> ARDV-X7-ARDV
-	Example 2: ARDVA -> ARDV-X7-RDVA
-	Example 3: ARDVAA -> ARDV-X7-DVAA
+	Example 1: ARDV (4) -> ARDV-X7-ARDV
+	Example 2: ARDVA (5) -> ARDV-X7-RDVA
+	Example 3: ARDVAA (6) -> ARDV-X7-DVAA
+(X7 padding is true until len(peptide) = 8)
+
+	Example 4: ARDVAAAAA (9) -> ARDV-XXX-A-XXX-AAAA
+	Example 5: ARDVAAAAAA (10) -> ARDV-XXX-AA-XX-AAAA
 
 - (KEY function) get_XY
     Input: df with columns "allele", "peptide", "measurement_value"
@@ -168,4 +172,18 @@ Literally just the paths to pertinent files.
 (*11) mhcglobe.py
 
 				
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
