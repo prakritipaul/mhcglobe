@@ -1,7 +1,22 @@
+import tensorflow as tf
+from tensorflow.keras import backend as K
 import joblib as jb
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from scipy.stats import linregress
 from sklearn.metrics import mean_squared_error
+
+import os
+import sys
+sys.path.append("/content/mhcglobe/src")
+import mhcglobe
+import mhc_data
+import inequality_loss
+import train_functions as trainf
+import binding_affinity as ba
+import sequence_functions as seqf
+
 
 def save_model(object_to_save, saved_object_filename):
   """
@@ -173,3 +188,8 @@ def make_comparison_df(ensemble_predictions, df_test):
   df_comparison = pd.concat([df_test, ensemble_predictions], axis=1)
   df_comparison = df_comparison.loc[:, ['allele', 'peptide', 'measurement_value', 'mhcglobe_affinity']]
   return df_comparison
+
+# useful for performance metrics during training
+def root_mean_squared_error(y_true, y_pred):
+    return K.sqrt(K.mean(K.square(y_pred - y_true)))
+
