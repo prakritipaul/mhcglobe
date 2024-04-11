@@ -131,6 +131,12 @@ class ensemble():
         
         X_tr: np.array
             Training inputs for MHCGlobe.
+
+            Notes: 
+                - It is of len 2
+                    - index 0 has embeddings for alleles (each allele has embedding of len 34)
+                    - index 1 has embeddings for peptides (each peptide has embedding of len 15)
+                - Each index has len of number of training samples - validation samples.
             
         Y_tr: np.array
             Training target values for MHCGlobe.
@@ -195,10 +201,15 @@ class ensemble():
         ensemble_predictions = pd.DataFrame()
         base_model_predictions = []
         for model in self.ensemble_base_models:
+            # get prediction for 1 model
             predictions = pd.DataFrame(model.predict(X, verbose=0))
+            # add to ensemble_predictions
             base_model_predictions.append(predictions)
+        # make 1 df with predictions
         ensemble_predictions = pd.concat(base_model_predictions, axis=1, ignore_index=True)
+        # take the mean of predictions (output of get_XY)
         ensemble_predictions.loc[:, 'mhcglobe_score'] = np.mean(ensemble_predictions, axis=1)
+        # convert above scores to actual binding affinities (will be directly comparable to test affinities)
         ensemble_predictions.loc[:, 'mhcglobe_affinity'] = list(map(ba.to_ic50,ensemble_predictions['mhcglobe_score']))
         ensemble_predictions.columns = self.hparam_ids + ['mhcglobe_score', 'mhcglobe_affinity']
         return ensemble_predictions[['mhcglobe_affinity', 'mhcglobe_score']]

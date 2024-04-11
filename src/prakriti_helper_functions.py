@@ -259,7 +259,7 @@ def get_peptide_pseudoseqs(train_or_es):
   peptide_pseudoseqs = [get_mhcflurry_representation(p) for p in peptides]
   return peptide_pseudoseqs
 
-def get_BERT_embeddings(aa_sxns, tokenizer, BERT_model, return_tensors):
+def get_BERT_embeddings(aa_sxns, tokenizer, model, return_tensors):
   """
     Gets features of alleles or peptides from a BERT-like model, like ESM2.
 
