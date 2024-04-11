@@ -44,12 +44,13 @@ def save_model(object_to_save, saved_object_filename):
   jb.dump(object_to_save, saved_object_filename)
 
 
-def make_scatter_plot(df, x_col, y_col):
+def make_scatter_plot(df, x_col, y_col, fig_name, save_dir):
   plt.scatter(df[x_col], df[y_col])
   plt.xlabel(x_col)
   plt.ylabel(y_col)
   plt.title("Scatter Plot")
-  plt.show()
+  plt.savefig(save_dir+fig_name)
+  return plt
 
 def get_r_squared_mse(df, x_col, y_col):
   slope, intercept, r_value, p_value, std_err = linregress(df[x_col], df[y_col])
@@ -189,7 +190,108 @@ def make_comparison_df(ensemble_predictions, df_test):
   df_comparison = df_comparison.loc[:, ['allele', 'peptide', 'measurement_value', 'mhcglobe_affinity']]
   return df_comparison
 
-# useful for performance metrics during training
+########### useful for performance metrics during training ###########
 def root_mean_squared_error(y_true, y_pred):
     return K.sqrt(K.mean(K.square(y_pred - y_true)))
+
+########### For BERT ###########
+def get_allele_pseudoseqs(train_or_es, mhc_data):
+  """
+    Gets pseudosquences for MHC alleles present in a train or es dataframe.
+
+    Args:
+      train_or_es: Data frame with cols
+        test (is it es or not), allele, peptide, measurement_inequality, measurement_value
+
+      mhc data object: used to make allele2seq dict.
+        e.g. pMHC = mhc_data.pMHC_Data
+        {'HLA-A*02:560': 'YFAMYGEKVAHTHVDTLYVRYHYYTWAVLAYEWY'...}
+
+    Returns:
+      allele_pseudoseqs: list of shape (n_alleles, 34)
+"
+    Example:
+      'DLA-88*508:01', 'Mamu-B*08:01' -> 'YYATYGEKVETVYVDTLYITYRDYTWAVWNYTWY',
+                                         'YSSEYEERAGHTDADTLYLTYHYYTWAEVAYTWY'
+  """
+  mhc_alleles = train_or_es["allele"]
+  allele2seq_dict = mhc_data.allele2seq
+
+  allele_pseudoseqs = [str(allele2seq_dict[a]) for a in mhc_alleles]
+  return allele_pseudoseqs
+
+def get_mhcflurry_representation(peptide):
+  """
+    Given a peptide sequence, return the mhcflurry representation.
+
+    Examples:
+      Example 1: ARDV (4) -> ARDV-X7-ARDV
+      Example 2: ARDVA (5) -> ARDV-X7-RDVA
+      Example 3: ARDVAA (6) -> ARDV-X7-DVAA
+        (X7 padding is true until len(peptide) = 8)
+      Example 4: ARDVAAAAA (9) -> ARDV-XXX-A-XXX-AAAA
+      Example 5: ARDVAAAAAA (10) -> ARDV-XXX-AA-XX-AAAA
+  """
+  middle_AAs = peptide[4:-4]
+  num_X = 15-(len(middle_AAs)+8)
+
+  if num_X%2 == 0:
+    pad_len = num_X//2
+    middle_AAs_with_pad = "X"*pad_len + middle_AAs + "X"*pad_len
+
+  else:
+    pad_len_left = num_X//2 + 1
+    pad_len_right = pad_len_left - 1
+    middle_AAs_with_pad = "X"*pad_len_left + middle_AAs + "X"*pad_len_right
+
+  mhcflurry_representation = peptide[:4] + middle_AAs_with_pad + peptide[-4:]
+  return mhcflurry_representation
+
+def get_peptide_pseudoseqs(train_or_es):
+  """
+    Same function as "get_allele_pseudoseqs", but for peptides.
+    
+    Returns:
+      peptide_pseudoseqs:
+        list of shape (n_peptides, 15)
+  """
+  peptides = train_or_es["peptide"]
+  peptide_pseudoseqs = [get_mhcflurry_representation(p) for p in peptides]
+  return peptide_pseudoseqs
+
+def get_BERT_embeddings(aa_sxns, tokenizer, BERT_model, return_tensors):
+  """
+    Gets features of alleles or peptides from a BERT-like model, like ESM2.
+
+    Args:
+      aa_sxns: list of amino acid sequences.
+        e.g. training/es_allele_pseudoseqs, training_peptide/es_pseudoseqs
+
+      tokenizer: tokenizer for the model from huggingface.
+      model: model for the model from huggingface.
+      return_tensors: "tf" or "pt"
+
+    Returns:
+      PyTorch/Tensorflow tensors of shape n_alleles/peptides x 34/15 x n_embedding_dims
+        e.g. n_embedding_dims = 320 for ESM2_t6_8M_UR50D.
+        Note: embeddings are from the last hidden state of the model.
+
+    Example:
+      tokenizer = EsmTokenizer.from_pretrained("facebook/esm2_t6_8M_UR50D")
+      model = TFEsmModel.from_pretrained("facebook/esm2_t6_8M_UR50D")
+      get_BERT_embeddings(training_allele_pseudoseqs, tokenizer, model, "tf")
+  """
+  inputs = tokenizer(aa_sxns, return_tensors=return_tensors, padding=False, truncation=False)
+  input_ids = inputs["input_ids"]
+  attention_mask = inputs["attention_mask"]
+  # Update them to not have <cls> and <eos> tokens.
+  updated_input_ids = input_ids[:, 1:-1]
+  updated_attention_mask = attention_mask[:, 1:-1]
+  updated_inputs = {"input_ids": updated_input_ids, "attention_mask": updated_attention_mask}
+  # Get outputs
+  outputs = model(**updated_inputs)
+  # Get last_hidden_states
+  BERT_embeddings = outputs.last_hidden_state
+  return BERT_embeddings
+
 
