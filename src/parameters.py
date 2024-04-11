@@ -1,6 +1,8 @@
 """
 	Has optimizer and compiler parameters. 
 """
+import tensorflow.keras.callbacks as Callbacks
+from tensorflow.keras.callbacks import EarlyStopping
 
 optimizer_params = {1: {"optimizer_type": "RMSprop",
                             "learning_rate": 0.0011339304,
