@@ -34,7 +34,7 @@ from tensorflow.keras import optimizers, losses
 ## TO DO Need to figure out correct filepath for this ##
 import os
 import sys
-sys.path.append("./mhcglobe/src")
+sys.path.append("./src")
 import mhcglobe
 import mhc_data
 import inequality_loss
