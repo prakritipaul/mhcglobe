@@ -53,6 +53,12 @@ es_allele_pseudoseqs = phf.get_allele_pseudoseqs(es, pMHC)
 training_peptide_pseudoseqs = phf.get_peptide_pseudoseqs(train)
 es_peptide_pseudoseqs = phf.get_peptide_pseudoseqs(es)
 
+# BERT_output_dir = "/home/ppaul/mhcglobe/server_test_files/BERT_colab_run_outputs_24_05_01"
+# training_allele_pseudoseqs = pd.read_csv(BERT_output_dir + "training_allele_pseudoseqs.csv")
+# training_peptide_pseudoseqs = pd.read_csv(BERT_output_dir + "training_peptide_pseudoseqs.csv")
+# es_allele_pseudoseqs = pd.read_csv(BERT_output_dir + "es_allele_pseudoseqs.csv")
+# es_peptide_pseudoseqs = pd.read_csv(BERT_output_dir + "es_peptide_pseudoseqs.csv")
+
 ########################################################################################################
 
 print("Transformers part!!!")
@@ -67,3 +73,7 @@ model = TFEsmModel.from_pretrained(model_dir)
 training_allele_BERT_embeddings = phf.get_BERT_embeddings(training_allele_pseudoseqs, tokenizer, model, "tf")
 training_peptide_BERT_embeddings = phf.get_BERT_embeddings(training_peptide_pseudoseqs, tokenizer, model, "tf")
      
+
+es_allele_BERT_embeddings = phf.get_BERT_embeddings(es_allele_pseudoseqs[:5], tokenizer, model, "tf")
+es_peptide_BERT_embeddings = phf.get_BERT_embeddings(es_peptide_pseudoseqs[:5], tokenizer, model, "tf")
+
