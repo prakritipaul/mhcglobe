@@ -3,6 +3,7 @@ import pandas as pd
 import joblib as jb
 import json
 
+print("Importing tf")
 import tensorflow as tf
 from tensorflow.keras.callbacks import EarlyStopping
 import tensorflow.keras.callbacks as Callbacks
@@ -10,9 +11,10 @@ from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.models import Model
 from tensorflow.keras import optimizers, losses
 
+print("Importing mhcglobe files")
 import os
 import sys
-sys.path.append("/content/mhcglobe/src")
+sys.path.append("./src")
 import mhcglobe
 import mhc_data
 import inequality_loss
@@ -22,6 +24,7 @@ import sequence_functions as seqf
 import prakriti_helper_functions as phf
 
 # Get data
+print("Getting data")
 pMHC = mhc_data.pMHC_Data(only_EL=False, drop_duplicate_records=True)
 pMHC_data = pMHC.data
 
@@ -32,15 +35,18 @@ pMHC_data_train = pMHC_data_train.reset_index(drop=True)
 human_pMHC_data_test = human_pMHC_data_test.reset_index(drop=True)
 
 # Get train and test
+print("Getting train and test")
 pMHC_data_train = pMHC_data_train[["allele", "peptide", "measurement_inequality", "measurement_value"]]
 human_pMHC_data_test = human_pMHC_data_test[["allele", "peptide", "measurement_inequality", "measurement_value"]]
 
 # Get train and es
+print("Getting train and es")
 train, es = trainf.BalanceSplitData().get_train_val(pMHC_data_train)
 train = train.reset_index(drop=True)
 es = es.reset_index(drop=True)
 
 # Get pseudoseqs
+print("Getting pseudoseqs")
 training_allele_pseudoseqs = phf.get_allele_pseudoseqs(train, pMHC)
 es_allele_pseudoseqs = phf.get_allele_pseudoseqs(es, pMHC)
 
@@ -49,6 +55,7 @@ es_peptide_pseudoseqs = phf.get_peptide_pseudoseqs(es)
 
 ########################################################################################################
 
+print("Transformers part!!!")
 # from transformers import EsmTokenizer, EsmModel
 from transformers import EsmTokenizer, TFEsmModel
 model_dir = "/scratch/gpfs/ppaul/.cache/huggingface/models--facebook--esm2_t6_8M_UR50D"
