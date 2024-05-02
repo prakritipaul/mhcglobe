@@ -9,7 +9,7 @@ from sklearn.metrics import mean_squared_error
 
 import os
 import sys
-sys.path.append("/content/mhcglobe/src")
+sys.path.append("/home/ppaul/mhcglobe/src")
 import mhcglobe
 import mhc_data
 import inequality_loss
