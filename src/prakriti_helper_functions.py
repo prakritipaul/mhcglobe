@@ -58,14 +58,14 @@ def get_r_squared_mse(df, x_col, y_col):
   return(r_value**2, mse)
 
 ## Get the prediction of 1 model and compare it with true ##
-def get_prediction_df(new_model, X, to_predict):
+def get_prediction_df(new_model, X, test_data):
   """
     Gets the prediction of 1 model ("mhcglobe_affinities" "mhcglobe_scores") and concatenates with
       all information of the test_data (all other cols below)
 
     Args:
       new_model: loaded NN from Eric's ensemble (or any NN)
-      X = matrix of features
+      X = matrix of features of test data set.
       to_predict = test data set- dataframe with cols: "allele" "peptide" "measurement_value"
 
     Returns:
@@ -92,7 +92,7 @@ def get_prediction_df(new_model, X, to_predict):
   prediction_df = pd.DataFrame(prediction_dict)
 
   # Munge to_predict so I can correctly concatenate the columns
-  munged_to_predict = to_predict
+  munged_to_predict = test_data
   munged_to_predict.index = prediction_df.index
 
   # Present the data nicely!
