@@ -24,7 +24,8 @@
 """
 import numpy as np
 import pandas as pd
-import joblib as jb ###
+import joblib as jb
+import pickle
 import json
 import matplotlib.pyplot as plt
 
@@ -190,13 +191,10 @@ def get_model_optimizer_params(model_num):
 	return params.optimizer_params[model_num]
 
 def recompile_model(model):
-	# TO DO: See if this returns anything!
-	model_compiler_params = params.model_compiler_params
-	model.compile(
-		optimizer=model_compiler_params["optimizer"],  # Use the same optimizer
-		loss=model_compiler_params["loss"],  # Use the same loss function
-		metrics=["mean_absolute_error", "mean_squared_error", "root_mean_squared_error"]
-		)
+	model.compile(optimizer=model.optimizer,
+			   loss=model.loss,
+			   metrics=["mean_absolute_error", "mean_squared_error", phf.root_mean_squared_error]
+			   )
 
 def make_training_specs(batch_size, epochs, shuffle, verbose, num_training_samples, num_es_samples):
 	# makes a dict using user args.
@@ -238,51 +236,69 @@ def get_training_performance_metrics(history):
 	return training_performance_metrics
 
 if __name__ == "__main__":
-	# input data args:
-	sample_num, random_state, train_data_csv, test_data_csv, es_data_csv, out_dir, out_train_data_csv, out_train_data2_csv, out_test_data_csv, out_es_data_csv = None, None, None, None, None, None, None, None, None, None
-	# arg: model
+	# args
 	model_num = 3
-	# training args:
-	batch_size, epochs, shuffle, verbose, num_training_samples, num_es_samples = 10000, 300, True, 1, 5000, 5000
-	# scatter plot arg
-	fig_name = "Scatter Plot"
-	 
+	batch_size, epochs, shuffle, verbose, num_training_samples, num_es_samples = 10000, 300, True, 1, "all", "all"
+	# change
+	fig_name = "Model 3 Scatter Plot"
+	# change
+	pickle_name = "server_OneHot_run_24_05_09.pkl"
+	
 	# global var
 	pMHC = mhc_data.pMHC_Data(only_EL=False, drop_duplicate_records=True)
 
+	# input data files : local
+	# data_dir = "/Users/prakritipaul/Library/CloudStorage/GoogleDrive-ppaul@alumni.princeton.edu/My Drive/Pre-industry Professional Prep/AImmunology/server_related/output_files/BERT_colab_run_outputs_24_05_01/"
+	# train_data_csv = data_dir + "all_columns_pMHC_data_train_428364.csv"
+	# test_data_csv = data_dir + "all_columns_human_pMHC_data_test_428364.csv"
 
-#############
-	pMHC = mhc_data.pMHC_Data(only_EL=False, drop_duplicate_records=True)
-	# CHANGE in della
-	# Input data files
-	data_dir = "/Users/prakritipaul/Library/CloudStorage/GoogleDrive-ppaul@alumni.princeton.edu/My Drive/Pre-industry Professional Prep/AImmunology/server_related/output_files/BERT_colab_run_outputs_24_05_01/"
-	train_data_csv = data_dir + "all_columns_pMHC_data_train_428364.csv"
-	test_data_csv = data_dir + "all_columns_human_pMHC_data_test_428364.csv"
+	# della
+	DATA_DIR = "/home/ppaul/mhcglobe_test_files/OneHot_colab_run_outputs_24_05_08/"
+	all_train_data_csv = DATA_DIR + "all_columns_train_seed-428364_24_05_08.csv"
+	test_data_csv = DATA_DIR + "all_columns_test_seed-428364_24_05_08.csv"
+	train_data_csv = DATA_DIR + "train_seed-428364_24_05_08.csv"
+	es_data_csv = DATA_DIR + "es_seed-428364_24_05_08.csv"
 
-	# CHANGE in della
-	# If you wanted to write out these files
-	out_dir = "/Users/prakritipaul/Library/CloudStorage/GoogleDrive-ppaul@alumni.princeton.edu/My Drive/Pre-industry Professional Prep/AImmunology/server_related/output_files/25_05_07-VS-BERT_colab_run_outputs_24_05_08/"
-	out_train_data_csv = "test_train_25_05_07b.csv"
-	out_test_data_csv = "test_test_25_05_07b.csv"
+	# local: If you wanted to write out these files
+	# out_dir = "/Users/prakritipaul/Library/CloudStorage/GoogleDrive-ppaul@alumni.princeton.edu/My Drive/Pre-industry Professional Prep/AImmunology/server_related/output_files/25_05_07-VS-BERT_colab_run_outputs_24_05_08/"
+	out_dir = "/home/ppaul/mhcglobe_test_files/"
+	# out_train_data_csv = "test_train_25_05_07b.csv"
+	# out_test_data_csv = "test_test_25_05_07b.csv"
+
+	#############
 
 	# Pipeline
-	train_data, test_data = get_train_test_data(pMHC, train_data_csv=train_data_csv, test_data_csv=test_data_csv)
-	
-	train, es = get_train_es_data(train_data_df=None, train_data_csv=None, es_data_csv=None, out_dir=None, out_train_data2_csv=None, out_es_data_csv=None)
-	
+	print("Getting training and test data")
+	train_data, test_data = get_train_test_data(pMHC, train_data_csv=all_train_data_csv, test_data_csv=test_data_csv)
+	print("Getting training and validation data")
+	train, es = get_train_es_data(train_data_csv=train_data_csv, es_data_csv=es_data_csv)
+	print("Getting OneHot features")
 	X_train, X_es, X_test, Y_train, Y_es, Y_test = get_OneHot_features_Y(train, es, test_data)
 
+	print("Getting model")
 	model = get_model(model_num)
 	optimizer_params = get_model_optimizer_params(model_num)
-	recompiled_model = recompile_model(model, optimizer_params)
-	# Training
+	print("Recompiling it")
+	recompile_model(model)
+	
+	print("Training Model")
 	training_specs = make_training_specs(batch_size, epochs, shuffle, verbose, num_training_samples, num_es_samples)
 	history = train_model(model, X_train, Y_train, X_es, Y_es, training_specs)
 	training_performance_metrics = get_training_performance_metrics(history)
-	# Testing	
-	prediction_df = phf.get_prediction_df(recompiled_model, X_test, test_data)
-	# Metrics
+	print("Testing Model")
+	prediction_df = phf.get_prediction_df(model, X_test, test_data)
+	print("Getting Test Performance Metrics")
 	scatter_plot = phf.make_scatter_plot(prediction_df, "measurement_value", "mhcglobe_affinities", fig_name, out_dir)
 	predictions_r, predictions_mse = phf.get_r_squared_mse(prediction_df, "measurement_value", "mhcglobe_affinities")
-	
- 
+
+	print("Pickle everything")
+	pickle_dict = {"optimizer_params": optimizer_params,
+				"training_specs": training_specs,
+				"history": history,
+				"training_performance_metrics": training_performance_metrics,
+				"prediction_df": prediction_df,
+				"predictions_r": predictions_r,
+				"predictions_mse": predictions_mse}
+
+	with open(out_dir+pickle_name, 'wb') as f:
+		pickle.dump(pickle_dict, f)
