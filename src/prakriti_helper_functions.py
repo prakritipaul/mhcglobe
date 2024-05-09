@@ -45,12 +45,12 @@ def save_model(object_to_save, saved_object_filename):
 
 
 def make_scatter_plot(df, x_col, y_col, fig_name, save_dir):
-  plt.scatter(df[x_col], df[y_col])
-  plt.xlabel(x_col)
-  plt.ylabel(y_col)
-  plt.title("Scatter Plot")
-  plt.savefig(save_dir+fig_name)
-  return plt
+    plt.scatter(df[x_col], df[y_col])
+    plt.xlabel(x_col)
+    plt.ylabel(y_col)
+    plt.title("Scatter Plot")
+    plt.savefig(save_dir+fig_name)
+    return plt
 
 def get_r_squared_mse(df, x_col, y_col):
   slope, intercept, r_value, p_value, std_err = linregress(df[x_col], df[y_col])

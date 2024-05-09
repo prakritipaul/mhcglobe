@@ -40,7 +40,7 @@ from tensorflow.keras import optimizers, losses
 ## TO DO Need to figure out correct filepath for this ##
 import os
 import sys
-sys.path.append("./src")
+sys.path.append("../src")
 import mhcglobe
 import mhc_data
 import inequality_loss
@@ -50,7 +50,7 @@ import binding_affinity as ba
 import sequence_functions as seqf
 import prakriti_helper_functions as phf
 
-def get_train_test_data(pMHC, sample_num=None, random_state=None, train_data_csv=None, test_data_csv=None, out_dir, out_train_data_csv, out_test_data_csv):
+def get_train_test_data(pMHC, sample_num=None, random_state=None, train_data_csv=None, test_data_csv=None, makedir=False, out_dir=None, out_train_data_csv=None, out_test_data_csv=None):
 		"""
 		- Given pMHC_data (all data in MHCGlobe = human + human', BA + EL)
 		- Get subsets = train + test samples
@@ -73,7 +73,7 @@ def get_train_test_data(pMHC, sample_num=None, random_state=None, train_data_csv
 				Note: train_data will include both training + validation sets.
 			2) test_data
 			3) 2 csvs will be written to out_dir.
-			
+			* All columns are present
 		"""
 		pMHC_data = pMHC.data
 		human_pMHC_data = pMHC_data[pMHC_data["allele"].str.contains("HLA")]
@@ -93,17 +93,22 @@ def get_train_test_data(pMHC, sample_num=None, random_state=None, train_data_csv
 			pMHC_data_train = pMHC_data[~pMHC_data.index.isin(human_pMHC_data_test.index)]
 			train_data = pMHC_data_train.reset_index(drop=True)
 			test_data = human_pMHC_data_test.reset_index(drop=True)
-
+		
 		# makes out_dir.
-		os.makedirs(out_dir, exist_ok=True)
-		# makes csv's that have all columns.
-		train_data.to_csv(out_dir + out_train_data_csv, index=False)
-		test_data.to_csv(out_dir + out_test_data_csv, index=False)
+		if makedir:
+			if not os.path.exists(out_dir):
+				os.makedirs(out_dir, exist_ok=True)
+				train_data.to_csv(out_dir + out_train_data_csv, index=False)
+				test_data.to_csv(out_dir + out_test_data_csv, index=False)
+			else:
+				train_data.to_csv(out_dir + out_train_data_csv, index=False)
+				test_data.to_csv(out_dir + out_test_data_csv, index=False)
+
 
 		return train_data, test_data
 
 
-def get_train_es_data(train_data_df=None, train_data_csv=None, es_data_csv=None, out_dir, out_train_data2_csv, out_es_data_csv):
+def get_train_es_data(train_data_df=None, train_data_csv=None, es_data_csv=None, makedir=False, out_dir=None, out_train_data2_csv=None, out_es_data_csv=None):
 	"""
 	- Takes training data from above and splits it into train + es data.
 	- Features only 4 relevant cols: allele, peptide, measurement_inequality, measurement_value
@@ -115,10 +120,11 @@ def get_train_es_data(train_data_df=None, train_data_csv=None, es_data_csv=None,
 	Returns:
 		- train + es
 		- Also writes them out to outdir.
+		* Cols:  test (True/False), allele, peptide measurement_inequality, measurement_value
 	"""
-	train_data_df = train_data_df[["allele", "peptide", "measurement_inequality", "measurement_value"]] 
 	# dataframe is provided; e.g. output of above function.
-	if train_data_df != None:
+	if train_data_df is not None:
+		train_data_df = train_data_df[["allele", "peptide", "measurement_inequality", "measurement_value"]] 
 		train, es = trainf.BalanceSplitData().get_train_val(train_data_df)
 		train = train.reset_index(drop=True)
 		es = es.reset_index(drop=True)
@@ -128,22 +134,32 @@ def get_train_es_data(train_data_df=None, train_data_csv=None, es_data_csv=None,
 		train = pd.read_csv(train_data_csv)
 		es = pd.read_csv(es_data_csv)
 	
-	# make out_dir if it doesn't exist
-	if not os.path.exists(out_dir):
-		os.makedirs(out_dir, exist_ok=True)
-		train.to_csv(out_dir + out_train_data2_csv, index=False)
-		es.to_csv(out_dir + out_es_data_csv, index=False)
+	if makedir:
+		# make out_dir if it doesn't exist
+		if not os.path.exists(out_dir):
+			os.makedirs(out_dir, exist_ok=True)
+			train.to_csv(out_dir + out_train_data2_csv, index=False)
+			es.to_csv(out_dir + out_es_data_csv, index=False)
 
-	else:
-		train.to_csv(out_dir + out_train_data2_csv, index=False)
-		es.to_csv(out_dir + out_es_data_csv, index=False)
+		else:
+			train.to_csv(out_dir + out_train_data2_csv, index=False)
+			es.to_csv(out_dir + out_es_data_csv, index=False)
 	
 	return train, es
 
-def get_OneHot_features_Y(train, es, test):
+def get_OneHot_features_Y(train=None, es=None, test=None, train_csv=None, es_csv=None, test_csv=None):
 	"""
-		- Same as above, just for OneHot
+	- gets OneHot encodings + Y values
+	- returns lists
 	"""
+	
+	if train_csv != None:
+		train = pd.read_csv(train_csv)
+	if es_csv != None:
+		es = pd.read_csv(es_csv)
+	if test_csv != None:
+		test = pd.read_csv(test_csv)
+	
 	X_train, Y_train = seqf.get_XY(
 		train,
 		encode_type="ONE_HOT",
@@ -156,7 +172,7 @@ def get_OneHot_features_Y(train, es, test):
 	
 	X_test, Y_test = seqf.get_XY(
 		test,
-		encode_type="ONE_HOT"
+		encode_type="ONE_HOT",
 		get_Y=True)
 	
 	return X_train, X_es, X_test, Y_train, Y_es, Y_test
@@ -179,9 +195,8 @@ def recompile_model(model):
 	model.compile(
 		optimizer=model_compiler_params["optimizer"],  # Use the same optimizer
 		loss=model_compiler_params["loss"],  # Use the same loss function
-		metrics=model_compiler_params["metrics"]
+		metrics=["mean_absolute_error", "mean_squared_error", "root_mean_squared_error"]
 		)
-	return model
 
 def make_training_specs(batch_size, epochs, shuffle, verbose, num_training_samples, num_es_samples):
 	# makes a dict using user args.
@@ -224,22 +239,37 @@ def get_training_performance_metrics(history):
 
 if __name__ == "__main__":
 	# input data args:
- 	sample_num, random_state, train_data_csv, test_data_csv, es_data_csv, out_dir, out_train_data_csv, out_train_data2_csv, out_test_data_csv, out_es_data_csv = None, None, None, None, None, None, None, None, None, None
+	sample_num, random_state, train_data_csv, test_data_csv, es_data_csv, out_dir, out_train_data_csv, out_train_data2_csv, out_test_data_csv, out_es_data_csv = None, None, None, None, None, None, None, None, None, None
 	# arg: model
- 	model_num = 3
+	model_num = 3
 	# training args:
- 	batch_size, epochs, shuffle, verbose, num_training_samples, num_es_samples = 10000, 300, True, 1, 5000, 5000
+	batch_size, epochs, shuffle, verbose, num_training_samples, num_es_samples = 10000, 300, True, 1, 5000, 5000
 	# scatter plot arg
- 	fig_name = "Scatter Plot"
+	fig_name = "Scatter Plot"
 	 
 	# global var
 	pMHC = mhc_data.pMHC_Data(only_EL=False, drop_duplicate_records=True)
 
-	# pipeline
- 	# get data
-	train_data, test_data = get_train_test_data(pMHC, sample_num=None, random_state=None, train_data_csv=None, test_data_csv=None, out_dir, out_train_data_csv, out_test_data_csv):
-	train, es = get_train_es_data(train_data_df=None, train_data_csv=None, es_data_csv=None, out_dir, out_train_data2_csv, out_es_data_csv)
-	# get features 
+
+#############
+	pMHC = mhc_data.pMHC_Data(only_EL=False, drop_duplicate_records=True)
+	# CHANGE in della
+	# Input data files
+	data_dir = "/Users/prakritipaul/Library/CloudStorage/GoogleDrive-ppaul@alumni.princeton.edu/My Drive/Pre-industry Professional Prep/AImmunology/server_related/output_files/BERT_colab_run_outputs_24_05_01/"
+	train_data_csv = data_dir + "all_columns_pMHC_data_train_428364.csv"
+	test_data_csv = data_dir + "all_columns_human_pMHC_data_test_428364.csv"
+
+	# CHANGE in della
+	# If you wanted to write out these files
+	out_dir = "/Users/prakritipaul/Library/CloudStorage/GoogleDrive-ppaul@alumni.princeton.edu/My Drive/Pre-industry Professional Prep/AImmunology/server_related/output_files/25_05_07-VS-BERT_colab_run_outputs_24_05_08/"
+	out_train_data_csv = "test_train_25_05_07b.csv"
+	out_test_data_csv = "test_test_25_05_07b.csv"
+
+	# Pipeline
+	train_data, test_data = get_train_test_data(pMHC, train_data_csv=train_data_csv, test_data_csv=test_data_csv)
+	
+	train, es = get_train_es_data(train_data_df=None, train_data_csv=None, es_data_csv=None, out_dir=None, out_train_data2_csv=None, out_es_data_csv=None)
+	
 	X_train, X_es, X_test, Y_train, Y_es, Y_test = get_OneHot_features_Y(train, es, test_data)
 
 	model = get_model(model_num)
@@ -252,7 +282,7 @@ if __name__ == "__main__":
 	# Testing	
 	prediction_df = phf.get_prediction_df(recompiled_model, X_test, test_data)
 	# Metrics
- 	scatter_plot = phf.make_scatter_plot(prediction_df, "measurement_value", "mhcglobe_affinities", fig_name, out_dir)
- 	predictions_r, predictions_mse = phf.get_r_squared_mse(prediction_df, "measurement_value", "mhcglobe_affinities")
+	scatter_plot = phf.make_scatter_plot(prediction_df, "measurement_value", "mhcglobe_affinities", fig_name, out_dir)
+	predictions_r, predictions_mse = phf.get_r_squared_mse(prediction_df, "measurement_value", "mhcglobe_affinities")
 	
  
