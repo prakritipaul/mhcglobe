@@ -50,9 +50,9 @@ is_ABC_set, not_ABC_set = set(), set()
 non_human_and_not_ABC_count = 0
 
 with open('mhcglobe_full_train_data.csv', newline='') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-    	i += 1
+	reader = csv.DictReader(csvfile)
+	for row in reader:
+		i += 1
     	# print(row, "\n")
     	gene, dataset, measurement_inequality, measurement_type, peptide, is_ABC, is_human = row["Gene"], row["dataset"], row["measurement_inequality"], row["measurement_type"], row["peptide"], row["is_ABC"], row["is_human"]
     	# print(gene, dataset, is_human, is_ABC)

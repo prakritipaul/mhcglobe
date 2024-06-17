@@ -7,7 +7,6 @@ from paths import DataPaths
 import my_functions as mf
 from sequence_functions import PseudoSeq
 
-
 class pMHC_Data():
     def __init__(self, only_EL, drop_duplicate_records=False):
         pMHC_data_path = DataPaths().mhcglobe_full_training_data
